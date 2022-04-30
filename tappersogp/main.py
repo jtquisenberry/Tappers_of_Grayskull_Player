@@ -7,14 +7,9 @@ import logging
 import os
 import re
 import traceback
-from collections import OrderedDict
-from tappersogp.enemies import enemies_list
-from tappersogp.shouts import shouts_list
 import pyperclip
 import cv2
-
-#command_count = 1
-#setting = ''
+import sys
 
 
 class TappersOGPlayer():
@@ -25,13 +20,14 @@ class TappersOGPlayer():
         self.port = 5037
         self.d = u2.connect('emulator-5554')
 
+        logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                            level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S',
+                            handlers=[
+                                logging.FileHandler("tappers.log"),
+                                logging.StreamHandler(sys.stdout)])
+
         self.start_time = datetime.now()
-
         self.image = None
-
-        # outfile_exists = True
-        # if not os.path.exists(self.outfile):
-        #    outfile_exists = False
 
     def _reboot_phone(self):
         print("REBOOTING")
@@ -47,17 +43,11 @@ class TappersOGPlayer():
                 for line in f2:
                     line_chunks = re.split("\t", line)
         else:
-            self.my_outfile.write("Timestamp\tSetting\tRequest\tShout\tSpell\tWeapon\tResponse\n")
+            self.my_outfile.write("\n")
             self.my_outfile.flush()
         return True
 
     def _click_skill(self):
-        # (117, 1596)
-        # (117, 1758)
-        # (117, 1908)
-        # (117, 2058)
-        # (117, 2208)
-
         self.d.click(117, 1596)
 
     def _click_shera(self):
@@ -73,10 +63,9 @@ class TappersOGPlayer():
         self.d.click(117, 2208)
 
     def _scroll_to_top(self):
-        for i in range(9):
+        for i in range(12):
             self.d.swipe(600, 1600, 600, 1900, .1)
-            #self.d.swipe(600, 1455, 600, 1900, duration=.25)
-            time.sleep(.05)
+            time.sleep(.2)
 
     def _scroll_to_bottom(self):
         for i in range(9):
@@ -116,32 +105,15 @@ class TappersOGPlayer():
         print(hierarchy)
 
     def _write_screenshot(self):
-        #hierarchy = self.d.dump_hierarchy()
-        #pyperclip.copy(hierarchy)
-        #print(hierarchy)
-
-        #date_time_string = self.start_time.strftime("%Y%m%d_%H%M%S")
         date_time_string = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         self.image = self.d.screenshot()  # default format="pillow"
         self.image.save(r"D:\Projects\tappers\screen_{}.png".format(date_time_string))
 
     def _do_move(self):
-        self.d.touch.down(600, 1900)  # Simulate press down
-        self.d.touch.sleep(seconds=.1)
-        # time.sleep(.01)  # The delay between down and move, you control it yourself
-        self.d.touch.move(0, 200)  # simulate movement
-        self.d.touch.sleep(seconds=.1)
-        self.d.touch.up(600, 1600)  # Simulate lift
-
-        # self.d.touch.down(400, 700).sleep(1).move(400, 1000).sleep(1).move(800,1000).sleep(1).move(800, 700).sleep(1).move(400, 700).sleep(1).up(400, 700)
-
         # Square
         self.d.touch.down(400, 700).sleep(1).move(400, 1000).sleep(.1).move(800, 1000).sleep(.1).move(800, 700).sleep(
             .1).move(400, 700).sleep(.1).up(400, 700)
-
-        # Swipe
-        # self.d.touch.down(500, 1900).sleep(1).move(500, 1600).sleep(.1).up(500, 1600)
 
     def _check_for_character_status(self):
         pixel = self.d.screenshot(format="opencv")
@@ -188,16 +160,11 @@ class TappersOGPlayer():
         time.sleep(2)
         self._time_travel()
 
-
     def _run_round_01(self):
-
-        # New swipe
-        #self.d.swipe(600, 1900, 600, 1455, duration=.25)
-
-        cows = 0
+        start_breakpoint = 0
 
         while True:
-
+            logging.info("START")
             time.sleep(2)
             self.d.click(300, 1000)
             time.sleep(1.5)
@@ -209,14 +176,12 @@ class TappersOGPlayer():
             time.sleep(1.5)
             self.d.click(300, 1000)
             time.sleep(15)
-            print("At first boss")
-
-
+            logging.info("Click Boss 1")
 
             self._click_skill()
-            time.sleep(.5)
+            time.sleep(1)
             self._click_master()
-            time.sleep(.5)
+            time.sleep(1)
             self._scroll_to_top()
             time.sleep(.5)
             self._click_master_1()
@@ -258,34 +223,22 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Reload Game")
+                logging.info("Reload Game")
                 self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Reload Game")
+                logging.info("Reload Game")
                 self._reload_game()
                 time.sleep(1)
                 continue
 
-
-            # self.image.getpixel((950, 1680))
-            # (9, 102, 170)
-
-            # self.image.getpixel((933, 1674))
-            # (231, 231, 231)
-
             self.d.swipe(600, 1900, 600, 1455, duration=.25)
-            #self.d.swipe(600, 1900, 600, 1600, .1)
             time.sleep(3)
 
-            #self.image = self.d.screenshot()  # default format="pillow"
-            #pixel = self.image.getpixel((850, 1680))
-
-
-            print("Scroll to second set.")
+            logging.info("Scroll to Second Set - Gwildor, Stratos, Clamp Champ")
             pixel = self.d.screenshot(format="opencv")
             r = pixel[1680, 850][2]
             g = pixel[1680, 850][1]
@@ -293,36 +246,34 @@ class TappersOGPlayer():
 
             while not (r in range(5, 15) and g in range(95, 110) and b in range(165, 185)) and \
                 not (r in range(225, 255) and g in range(225, 255) and b in range(225, 255)):
+                time.sleep(1)
                 self._click_skill()
+                time.sleep(1)
                 self._click_master()
+                time.sleep(1)
                 self._scroll_to_top()
                 time.sleep(2)
                 self.d.swipe(600, 1900, 600, 1455, duration=.25)
                 time.sleep(2)
                 pixel = self.d.screenshot(format="opencv")
-
                 r = pixel[1680, 850][2]
                 g = pixel[1680, 850][1]
                 b = pixel[1680, 850][0]
-                xxx = 1
 
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Reload Game")
+                logging.info("Reload Game - Character Status")
                 self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Reload Game")
+                print("Reload Game - Injury")
                 self._reload_game()
                 time.sleep(1)
                 continue
-
-
-
 
             self._click_master_1()
             time.sleep(1)
@@ -365,20 +316,21 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Reload Game")
+                logging.info("Reload Game - Character Status")
                 self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Reload Game")
+                print("Reload Game - Injury")
                 self._reload_game()
                 time.sleep(1)
                 continue
 
             time.sleep(3)
-            print("Third set")
+
+            logging.info("Scroll to Third Set: MossMan, Sy-Klone, Zodac")
             self.d.swipe(600, 1900, 600, 1455, duration=.25)
             time.sleep(3)
             pixel = self.d.screenshot(format="opencv")
@@ -389,7 +341,9 @@ class TappersOGPlayer():
             while not (r in range(5, 15) and g in range(95, 110) and b in range(165, 185)) and \
                     not (r in range(225, 255) and g in range(225, 255) and b in range(225, 255)):
                 self._click_skill()
+                time.sleep(1)
                 self._click_master()
+                time.sleep(1)
                 self._scroll_to_top()
                 time.sleep(2)
                 self.d.swipe(600, 1900, 600, 1455, duration=.25)
@@ -397,23 +351,21 @@ class TappersOGPlayer():
                 self.d.swipe(600, 1900, 600, 1455, duration=.25)
                 time.sleep(2)
                 pixel = self.d.screenshot(format="opencv")
-
                 r = pixel[1680, 850][2]
                 g = pixel[1680, 850][1]
                 b = pixel[1680, 850][0]
-                xxx = 1
 
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Reload Game")
+                logging.info("Reload Game - Character Status")
                 self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Reload Game")
+                print("Reload Game - Injury")
                 self._reload_game()
                 time.sleep(1)
                 continue
@@ -439,64 +391,60 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Reload Game")
+                logging.info("Reload Game - Character Status")
                 self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Reload Game")
+                print("Reload Game - Injury")
                 self._reload_game()
                 time.sleep(1)
                 continue
 
-
             start_tap_time = datetime.now()
-
             time.sleep(1)
 
-
             # Click Fight Boss
+            logging.info("Click Boss 2")
             self.d.click(920, 230)
 
-            print("Swipe Attack 1")
+            logging.info("Tap Attack 1 (360 seconds)")
             while True:
-                # Squareish
-                #self.d.touch.down(400, 700).sleep(1).move(400, 1000).sleep(.1).move(800, 1000).sleep(.1).move(800, 700).sleep(
-                #    .1).sleep(.1).up(800, 700)
                 self.d.swipe(500, 500, 500, 1200, .05)
                 time.sleep(.05)
                 total_seconds = (datetime.now() - start_tap_time).total_seconds()
-                if total_seconds > 420:
+                if total_seconds > 360:
                     break
 
-
-            #self._write_screenshot()
-
-
-
-            # SNAPSHOT
-
-            print("Sleep 1")
             time.sleep(1)
-            print("Activate Zodac")
+            logging.info("Click Zodac")
             self._click_master_3()
-            print("Sleep 60")
+            logging.info("Sleep 60 seconds")
             time.sleep(60)
 
             if self._check_for_character_status():
-                q = 1
+                self.d.click(930, 430)
+                time.sleep(1)
+                logging.info("Reload Game - Character Status")
+                self._reload_game()
+                time.sleep(1)
+                continue
             if self._check_for_injury():
-                q = 1
+                self.d.click(930, 730)
+                time.sleep(1)
+                print("Reload Game - Injury")
+                self._reload_game()
+                time.sleep(1)
+                continue
 
-            print("Click Boss")
-            # Click Fight Boss
+            logging.info("Click Boss 2")
             self.d.click(920, 230)
 
             self._write_screenshot()
             start_tap_time = datetime.now()
-            print("Tap Attack 2")
+            logging.info("Tap Attack 2 (120 seconds)")
             time.sleep(1)
             while True:
                 self.d.swipe(500, 500, 500, 1200, .05)
@@ -504,16 +452,27 @@ class TappersOGPlayer():
                 total_seconds = (datetime.now() - start_tap_time).total_seconds()
                 if total_seconds > 120:
                     break
-            print("Activate Rio Blast")
+
+
             time.sleep(1)
 
             if self._check_for_character_status():
-                q = 1
+                self.d.click(930, 430)
+                time.sleep(1)
+                logging.info("Reload Game - Character Status")
+                self._reload_game()
+                time.sleep(1)
+                continue
             if self._check_for_injury():
-                q = 1
+                self.d.click(930, 730)
+                time.sleep(1)
+                print("Reload Game - Injury")
+                self._reload_game()
+                time.sleep(1)
+                continue
 
-            print("Fourth set")
-            self.d.swipe(600, 1900, 600, 1455, duration=.25)
+            logging.info("Scroll to Fourth Set: Rio Blast, Mekaneck, He-Man")
+            self.d.swipe(600, 1900, 600, 1440, duration=.25)
             pixel = self.d.screenshot(format="opencv")
             r = pixel[1680, 850][2]
             g = pixel[1680, 850][1]
@@ -522,48 +481,63 @@ class TappersOGPlayer():
             while not (r in range(5, 15) and g in range(95, 110) and b in range(165, 185)) and \
                     not (r in range(225, 255) and g in range(225, 255) and b in range(225, 255)):
                 self._click_skill()
+                time.sleep(1)
                 self._click_master()
+                time.sleep(1)
                 self._scroll_to_top()
                 time.sleep(2)
                 self.d.swipe(600, 1900, 600, 1455, duration=.25)
                 time.sleep(2.5)
                 self.d.swipe(600, 1900, 600, 1455, duration=.25)
                 time.sleep(2.5)
-                self.d.swipe(600, 1900, 600, 1455, duration=.25)
+                self.d.swipe(600, 1900, 600, 1440, duration=.25)
                 time.sleep(2.5)
                 pixel = self.d.screenshot(format="opencv")
 
                 r = pixel[1680, 850][2]
                 g = pixel[1680, 850][1]
                 b = pixel[1680, 850][0]
-                xxx = 1
+
+            logging.info("Click Rio Blast")
             time.sleep(3)
             self._click_master_1()
+            time.sleep(1)
+            self._click_master_1()
+            time.sleep(1)
 
             if self._check_for_character_status():
-                q = 1
+                time.sleep(1)
+                self.d.click(930, 430)
+                time.sleep(1)
             if self._check_for_injury():
-                q = 1
+                self.d.click(930, 730)
+                time.sleep(1)
+                logging.info("Injury Time Travel")
+                self._time_travel()
+                time.sleep(1)
+                continue
 
-            print("Click Boss")
-            # Click Fight Boss
+            logging.info("Click Boss")
             self.d.click(920, 230)
 
-
+            logging.info("Tap Attack 3")
             time.sleep(1)
             start_tap_time = datetime.now()
             while True:
                 self.d.swipe(500, 500, 500, 1200, .05)
                 time.sleep(.05)
                 total_seconds = (datetime.now() - start_tap_time).total_seconds()
-                if total_seconds > 90:
+                if total_seconds > 120:
                     break
 
-            time.sleep(2)
+            time.sleep(1)
+            logging.info("Click Mekaneck")
             self._click_master_2()
-            time.sleep(2)
+            time.sleep(1)
+            self._click_master_2()
+            time.sleep(1)
 
-            print("Click Mekaneck")
+            logging.info("Click Boss")
             self.d.click(920, 230)
 
             start_tap_time = datetime.now()
@@ -575,27 +549,28 @@ class TappersOGPlayer():
                     break
 
             if self._check_for_character_status():
+                time.sleep(1)
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Character Status Time Travel")
-                self._time_travel()
-                time.sleep(1)
-                continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Injury Time Travel")
+                logging.info("Injury Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
             time.sleep(2)
+            logging.info("Click He-Man")
             self._click_master_3()
-            time.sleep(2)
+            time.sleep(30)
+            self._click_master_3()
+            time.sleep(1)
 
-            print("Click He-man")
+            logging.info("Click Boss")
             self.d.click(920, 230)
 
+            logging.info("Tap Attack 4 (110 seconds)")
             start_tap_time = datetime.now()
             while True:
                 self.d.swipe(500, 500, 500, 1200, .05)
@@ -607,204 +582,205 @@ class TappersOGPlayer():
             time.sleep(1)
 
             if self._check_for_character_status():
+                time.sleep(1)
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Character Status Time Travel")
-                self._time_travel()
-                time.sleep(1)
-                continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Injury Time Travel")
+                logging.info("Injury Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
-            print("Upgrade Rio Blast, Mekaneck, He-Man")
+            logging.info("Upgrade Rio Blast, Mekaneck, He-Man")
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
 
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
 
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
 
             if self._check_for_character_status():
+                time.sleep(1)
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Character Status Time Travel")
-                self._time_travel()
-                time.sleep(1)
-                continue
+                #logging.info("Character Status Time Travel")
+                #print("Character Status Time Travel")
+                #self._time_travel()
+                #time.sleep(1)
+                #continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Injury Time Travel")
+                logging.info("Injury Time Travel")
+                #print("Injury Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
 
-            print("Upgrade Teela")
-
-            self._scroll_to_top()
+            logging.info("Upgrade Teela")
+            #print("Upgrade Teela")
             time.sleep(1)
+            self._scroll_to_top()
+            time.sleep(2)
 
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_1()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_1()
-            time.sleep(3)
+            time.sleep(2)
 
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_2()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_2()
-            time.sleep(3)
+            time.sleep(2)
 
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._upgrade_master_3()
-            time.sleep(3)
+            time.sleep(2)
             self._click_master_3()
-            time.sleep(3)
+            time.sleep(2)
 
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Character Status Time Travel")
+                logging.info("Character Status Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Injury Time Travel")
+                logging.info("Injury Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
-            print("Fourth set")
+            logging.info("Fourth Set")
             self.d.swipe(600, 1900, 600, 1455, duration=.25)
             pixel = self.d.screenshot(format="opencv")
             r = pixel[1680, 850][2]
@@ -814,17 +790,18 @@ class TappersOGPlayer():
             while not (r in range(5, 15) and g in range(95, 110) and b in range(165, 185)) and \
                     not (r in range(225, 255) and g in range(225, 255) and b in range(225, 255)):
                 self._click_skill()
+                time.sleep(1)
                 self._click_master()
+                time.sleep(1)
                 self._scroll_to_top()
                 time.sleep(2)
                 self.d.swipe(600, 1900, 600, 1455, duration=.25)
                 time.sleep(2.5)
                 pixel = self.d.screenshot(format="opencv")
-
                 r = pixel[1680, 850][2]
                 g = pixel[1680, 850][1]
                 b = pixel[1680, 850][0]
-                xxx = 1
+
             time.sleep(3)
 
             self._upgrade_master_1()
@@ -854,7 +831,6 @@ class TappersOGPlayer():
             self._upgrade_master_1()
             time.sleep(3)
 
-
             self._upgrade_master_2()
             time.sleep(3)
             self._click_master_2()
@@ -881,7 +857,6 @@ class TappersOGPlayer():
             time.sleep(3)
             self._upgrade_master_2()
             time.sleep(3)
-
 
             self._upgrade_master_3()
             time.sleep(2)
@@ -913,19 +888,19 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                print("Character Status Time Travel")
+                logging.info("Character Status Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                print("Injury Time Travel")
+                logging.info("Injury Time Travel")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
-            print("Back to the past")
+            logging.info("Back to the Past")
 
             self._click_skill()
             time.sleep(1)
@@ -934,42 +909,10 @@ class TappersOGPlayer():
             self.d.click(550, 1100)
             time.sleep(7)
 
-            #self._run_round_01()
-
-
-            a = 1
-
+            end_breakpoint = 1
 
     def start(self):
-        print("STARTING")
-        #self._setup_files()
-
         self._run_round_01()
-
-
-
-
-
-        a = 1
-
-        #(117, 1596)
-        #(117, 1758)
-        #(117, 1908)
-        #(117, 2058)
-        #(117, 2208)
-
-        #d(scrollable=True).scroll(steps=10)
-
-        # self.d.swipe(900, 1900, 900, 1600, .5)
-        self.d.drag(600, 1900, 600, 1600, .2)
-        self.d.swipe(600, 1900, 600, 1600, .2)
-        self.d.click(117, 1758)
-
-        # self.my_outfile.close()
-        end_time = datetime.now()
-        print(end_time - self.start_time)
-        print("Done")
-
         return True
 
 
