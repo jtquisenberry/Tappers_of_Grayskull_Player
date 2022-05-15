@@ -1,4 +1,4 @@
-#https://github.com/openatx/uiautomator2#image-match
+# https://github.com/openatx/uiautomator2#image-match
 import uiautomator2 as u2
 from ppadb.client import Client
 import time
@@ -10,6 +10,7 @@ import traceback
 import pyperclip
 import cv2
 import sys
+from threading import Thread
 
 
 class TappersOGPlayer():
@@ -28,6 +29,25 @@ class TappersOGPlayer():
 
         self.start_time = datetime.now()
         self.image = None
+
+        thread_1 = Thread(target=self._threaded_screenshot)
+        thread_1.start()
+        thread_2 = Thread(target=self._threaded_handle_close_app_wait)
+        thread_2.start()
+
+    def _threaded_screenshot(self):
+        while True:
+            self._write_screenshot()
+            time.sleep(30)
+
+    def _threaded_handle_close_app_wait(self):
+        while True:
+            hierarchy = self.d.dump_hierarchy()
+            if "Wait" in hierarchy and "Close app" in hierarchy:
+                button = self.d(className="android.widget.Button",
+                                resourceId="android:id/aerr_wait")
+                button.click()
+            time.sleep(30)
 
     def _reboot_phone(self):
         print("REBOOTING")
@@ -176,8 +196,8 @@ class TappersOGPlayer():
             time.sleep(1.5)
             self.d.click(300, 1000)
             time.sleep(15)
-            logging.info("Click Boss 1")
 
+            logging.info("Scroll to First Set: Teela, Snout Spout, Man-at-Arms")
             self._click_skill()
             time.sleep(1)
             self._click_master()
@@ -223,22 +243,22 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                logging.info("Reload Game")
-                self._reload_game()
+                logging.info("Reload Game - Character Status")
+                #self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                logging.info("Reload Game")
+                logging.info("Reload Game - Injury")
                 self._reload_game()
                 time.sleep(1)
                 continue
 
+            logging.info("Scroll to Second Set: Gwildor, Stratos, Clamp Champ")
             self.d.swipe(600, 1900, 600, 1455, duration=.25)
             time.sleep(3)
 
-            logging.info("Scroll to Second Set - Gwildor, Stratos, Clamp Champ")
             pixel = self.d.screenshot(format="opencv")
             r = pixel[1680, 850][2]
             g = pixel[1680, 850][1]
@@ -264,7 +284,7 @@ class TappersOGPlayer():
                 self.d.click(930, 430)
                 time.sleep(1)
                 logging.info("Reload Game - Character Status")
-                self._reload_game()
+                #self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
@@ -317,7 +337,7 @@ class TappersOGPlayer():
                 self.d.click(930, 430)
                 time.sleep(1)
                 logging.info("Reload Game - Character Status")
-                self._reload_game()
+                #self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
@@ -359,7 +379,7 @@ class TappersOGPlayer():
                 self.d.click(930, 430)
                 time.sleep(1)
                 logging.info("Reload Game - Character Status")
-                self._reload_game()
+                #self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
@@ -392,7 +412,7 @@ class TappersOGPlayer():
                 self.d.click(930, 430)
                 time.sleep(1)
                 logging.info("Reload Game - Character Status")
-                self._reload_game()
+                #self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
@@ -407,7 +427,7 @@ class TappersOGPlayer():
             time.sleep(1)
 
             # Click Fight Boss
-            logging.info("Click Boss 2")
+            logging.info("Click Boss 1")
             self.d.click(920, 230)
 
             logging.info("Tap Attack 1 (360 seconds)")
@@ -421,14 +441,16 @@ class TappersOGPlayer():
             time.sleep(1)
             logging.info("Click Zodac")
             self._click_master_3()
+            time.sleep(2)
+            self._click_master_3()
             logging.info("Sleep 60 seconds")
-            time.sleep(60)
+            #time.sleep(60)
 
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
                 logging.info("Reload Game - Character Status")
-                self._reload_game()
+                #self._reload_game()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
@@ -440,9 +462,8 @@ class TappersOGPlayer():
                 continue
 
             logging.info("Click Boss 2")
-            self.d.click(920, 230)
+            #self.d.click(920, 230)
 
-            self._write_screenshot()
             start_tap_time = datetime.now()
             logging.info("Tap Attack 2 (120 seconds)")
             time.sleep(1)
@@ -512,15 +533,15 @@ class TappersOGPlayer():
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                logging.info("Injury Time Travel")
+                logging.info("Time Travel - Injury")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
-            logging.info("Click Boss")
+            logging.info("Click Boss 3")
             self.d.click(920, 230)
 
-            logging.info("Tap Attack 3")
+            logging.info("Tap Attack 3 (120 seconds)")
             time.sleep(1)
             start_tap_time = datetime.now()
             while True:
@@ -537,7 +558,7 @@ class TappersOGPlayer():
             self._click_master_2()
             time.sleep(1)
 
-            logging.info("Click Boss")
+            logging.info("Click Boss 4")
             self.d.click(920, 230)
 
             start_tap_time = datetime.now()
@@ -567,7 +588,7 @@ class TappersOGPlayer():
             self._click_master_3()
             time.sleep(1)
 
-            logging.info("Click Boss")
+            logging.info("Click Boss 5")
             self.d.click(920, 230)
 
             logging.info("Tap Attack 4 (110 seconds)")
@@ -588,7 +609,7 @@ class TappersOGPlayer():
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                logging.info("Injury Time Travel")
+                logging.info("Time Travel - Injury")
                 self._time_travel()
                 time.sleep(1)
                 continue
@@ -641,23 +662,15 @@ class TappersOGPlayer():
                 time.sleep(1)
                 self.d.click(930, 430)
                 time.sleep(1)
-                #logging.info("Character Status Time Travel")
-                #print("Character Status Time Travel")
-                #self._time_travel()
-                #time.sleep(1)
-                #continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                logging.info("Injury Time Travel")
-                #print("Injury Time Travel")
+                logging.info("Time Travel - Injury")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
-
-            logging.info("Upgrade Teela")
-            #print("Upgrade Teela")
+            logging.info("Upgrade Teela, Snout Spout, Man-at-Arms")
             time.sleep(1)
             self._scroll_to_top()
             time.sleep(2)
@@ -768,19 +781,19 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                logging.info("Character Status Time Travel")
+                logging.info("Time Travel - Character Status")
                 self._time_travel()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                logging.info("Injury Time Travel")
+                logging.info("Time Travel - Injury")
                 self._time_travel()
                 time.sleep(1)
                 continue
 
-            logging.info("Fourth Set")
+            logging.info("Upgrade Gwildor, Stratos, Clamp Champ")
             self.d.swipe(600, 1900, 600, 1455, duration=.25)
             pixel = self.d.screenshot(format="opencv")
             r = pixel[1680, 850][2]
@@ -888,14 +901,14 @@ class TappersOGPlayer():
             if self._check_for_character_status():
                 self.d.click(930, 430)
                 time.sleep(1)
-                logging.info("Character Status Time Travel")
+                logging.info("Time Travel - Character Status")
                 self._time_travel()
                 time.sleep(1)
                 continue
             if self._check_for_injury():
                 self.d.click(930, 730)
                 time.sleep(1)
-                logging.info("Injury Time Travel")
+                logging.info("Time Travel - Injury")
                 self._time_travel()
                 time.sleep(1)
                 continue
