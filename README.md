@@ -1,6 +1,6 @@
 # Tappers of Grayskull Player
 
-## Introduction
+# Introduction
 
 He-Man Tappers of Grayskull is a tapper game for Android and iOS. Completing higher stages requires fortifying characters with artifact upgrades using keys, one of two in-game currencies. 
 
@@ -8,7 +8,22 @@ This Tappers of Grayskull Player application is designed to accumulate keys with
 
 I built the Player after tournaments were discontinued. Thus, cheating at multiplayer has not been possible.
 
-## Strategy
+# Usage
+
+```
+python tappers_ogp.py
+```
+
+# Requirements
+
+## Python Packages
+
+```
+uiautomator2
+pure-python-adb
+```
+
+# Strategy
 
 It is assumed that the user has already advanced far enough in the game to upgrade the artifact that provides a gold bonus when time-traveling. The user should have upgraded the artifact that increases the number of keys obtained after time travel. 
 
@@ -16,7 +31,7 @@ The Player plays typically 155-159 stages, upgrades characters, and time travels
 
 Once the user can reach level 2,700, gathering keys is no longer the most efficient way to pass stages. Even pouring hundreds of thousands of keys into artifacts does little to increase the power of characters and enable them to progress to the next stage. At that point, repeated use of the Sacrifice skill, followed by the cooldown reduction skill is recommended. That can be accomplished with the ClickMate macro recorder on Android.
 
-### Table of Formal Names
+## Table of Formal Names
 
 |                                                | He-Man           | She-Ra                        |
 |------------------------------------------------|------------------|-------------------------------|
@@ -26,7 +41,12 @@ Once the user can reach level 2,700, gathering keys is no longer the most effici
 | Artifact granting extra gold after time travel | Secret Treasure  | Glittering Bangle             |
 | Store option to reduce enemies per stage       | Cowardly Enemies | Cowardly Enemies              |
 
-## Technical
+# Example
+
+![Enemy](images/screen_20220424_175407.png?raw=true "Enemy")
+
+
+# Technical
 
 The application relies on UIAutomator2, a Python package that wraps ADB (Android Debug Bridge) interfaces. See https://github.com/openatx/uiautomator2#image-match.
 
@@ -36,7 +56,7 @@ I commented out code that reloads the saved game when a character is injured bef
 
 I have used UIAutomator on both a physical Samsung Galaxy A71 phone and an emulated Pixel 4 phone. I have run the Player only with the emulated device.    
 
-## Notes about the Game
+# Notes about the Game
 
 * The final dimensional artifact can be obtained at stage 3001 on the She-Ra side of the game.
 * Online functionality, such as tournaments, was discontinued around July 1, 2019.
